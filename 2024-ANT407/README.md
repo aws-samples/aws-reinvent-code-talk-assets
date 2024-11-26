@@ -1,0 +1,6 @@
+# ANT407 - Predictive maintenance with Amazon Managed Service for Apache Flink 
+
+Dive into the power of **Amazon Managed Service for Apache Flink** to build a predictive maintenance application using real-time sensor data in this hands-on live coding session. Walk through live coding to build a Flink application, ingest sensor data streams, and apply advanced analytics techniques to predict potential equipment failures. Join this session to experience the seamless integration of *Flink* with AWS services for real-time data processing and predictive maintenance scenarios. 
+
+## Code Walkthrough
+During the session, we will show you how to create an Amazon Managed Service for Apache Flink application using a Studio notebook, which is also available in this Git repository. We will walk you through the code step by step and explain tips and tricks to detect and prevent maintenance events using Flink's Table API. We will also guide you through the process of setting up the architecture and achieving an end-to-end use case within the session.
