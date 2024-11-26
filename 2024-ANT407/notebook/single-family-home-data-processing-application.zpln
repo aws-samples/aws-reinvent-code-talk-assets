@@ -1,0 +1,1034 @@
+﻿{
+  "paragraphs": [
+    {
+      "title": "# Sensor Data Messege Format",
+      "text": "{\n    \"FacilityId\": 1,\n    \"FacilityType\": \"Single-Family-Home\",\n    \"FacilityName\": \"Smith Home\",\n    \"EventTime\": \"2024-10-09 10:03:10\",\n    \"OutdoorTemp\": 60,\n    \"Doors\": [\n        {\n            \"DoorId\": 1,\n            \"DoorName\": \"Main Front Door\",\n            \"IsDoorOpen\": 0\n        },\n        {\n            \"DoorId\": 2,\n            \"DoorName\": \"Deck Door\",\n            \"IsDoorOpen\": 0\n        }\n    ],\n    \"SubFacilities\": [\n        {\n            \"SubFacilityId\": 1,\n            \"SubFacilityType\": \"Room\",\n            \"SubFacilityName\": \"Family Room\",\n            \"SubFacilityTemp\": 71,\n            \"SubFacilityDesiredTemp\": 71,\n            \"IsHeatingOn\": 0,\n            \"IsCoolingOn\": 1,\n            \"Windows\": [\n                {\n                    \"WindowId\": 1,\n                    \"WindowName\": \"Left Window\",\n                    \"IsWindowOpen\": 0\n                },\n                {\n                    \"WindowId\": 2,\n                    \"WindowName\": \"Lake View Window\",\n                    \"IsWindowOpen\": 0\n                }\n            ]\n        },\n        {\n            \"SubFacilityId\": 2,\n            \"SubFacilityType\": \"Room\",\n            \"SubFacilityName\": \"Bed Room\",\n            \"SubFacilityTemp\": 76,\n            \"SubFacilityDesiredTemp\": 72,\n            \"IsHeatingOn\": 0,\n            \"IsCoolingOn\": 1,\n            \"Windows\": [\n                {\n                    \"WindowId\": 3,\n                    \"WindowName\": \"Front Window\",\n                    \"IsWindowOpen\": 0\n                },\n                {\n                    \"WindowId\": 4,\n                    \"WindowName\": \"Neighbour Window\",\n                    \"IsWindowOpen\": 0\n                }\n            ]\n        }\n    ]\n}\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212013_1054159034",
+      "id": "paragraph_1728486014755_388741094",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "focus": true,
+      "$$hashKey": "object:194"
+    },
+    {
+      "title": "#1 : Create in memory table to read sensor data from sensor-data-stream kinesis stream",
+      "text": "%flink.ssql(type=update)\n-- https://nightlies.apache.org/flink/flink-docs-release-1.15/docs/dev/table/sql/overview/\n\nDROP TABLE IF EXISTS sensor_data;\n\nCREATE TABLE sensor_data (\nFacilityId BIGINT,\nFacilityType VARCHAR,\nFacilityName VARCHAR,\nEventTime TIMESTAMP(3),\nOutdoorTemp DOUBLE,\nDoors ARRAY<ROW<DoorId BIGINT, DoorName VARCHAR, IsDoorOpen INT>>,\nSubFacilities ARRAY<ROW<SubFacilityId BIGINT, SubFacilityType VARCHAR, SubFacilityName VARCHAR, SubFacilityTemp DOUBLE, SubFacilityDesiredTemp DOUBLE, IsHeatingOn INT, IsCoolingOn INT,Windows ARRAY<ROW<WindowId BIGINT, WindowName VARCHAR, IsWindowOpen INT>>>>,\nWATERMARK FOR EventTime AS EventTime - INTERVAL '5' SECOND\n)\nWITH (\n'connector' = 'kinesis',\n'stream' = 'sensor-data-stream',\n'aws.region' = 'us-east-1',\n'scan.stream.initpos' = 'LATEST',\n'format' = 'json');",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Table has been dropped.\nTable has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212090_1495910239",
+      "id": "paragraph_1726582724985_2112879185",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:195"
+    },
+    {
+      "title": "#2 : View in coming sensor-data from sensor-data-stream kinesis stream",
+      "text": "%flink.ssql(type=update)\nSELECT *\nFROM sensor_data\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {
+                    "columns": [
+                      {
+                        "name": "FacilityId0",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "FacilityType1",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "FacilityName2",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "ReportedTime3",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "OutdoorTemp4",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "Doors5",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "SubFacilities6",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      }
+                    ],
+                    "scrollFocus": {},
+                    "selection": [],
+                    "grouping": {
+                      "grouping": [],
+                      "aggregations": [],
+                      "rowExpandedStates": {}
+                    },
+                    "treeView": {},
+                    "pagination": {
+                      "paginationCurrentPage": 1,
+                      "paginationPageSize": 250
+                    }
+                  },
+                  "tableColumnTypeState": {
+                    "updated": false,
+                    "names": {
+                      "FacilityId": "string",
+                      "FacilityType": "string",
+                      "FacilityName": "string",
+                      "EventTime": "string",
+                      "OutdoorTemp": "string",
+                      "Doors": "string",
+                      "SubFacilities": "string"
+                    }
+                  },
+                  "updated": false,
+                  "initialized": false,
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  }
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "FacilityId",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "FacilityType",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "FacilityId\tFacilityType\tFacilityName\tEventTime\tOutdoorTemp\tDoors\tSubFacilities\n1\tSingle-Family-Home\tSmith Home\t2024-10-20 21:36:40.000\t60.0\t[+I[1, Main Front Door, 0], +I[2, Deck Door, 0]]\t[+I[1, Room, Family Room, 71.0, 71.0, 0, 1, [+I[1, Left Window, 0], +I[2, Lake View Window, 0]]], +I[2, Room, Bed Room, 76.0, 72.0, 0, 1, [+I[3, Front Window, 0], +I[4, Neighbour Window, 0]]]]\n1\tSingle-Family-Home\tSmith Home\t2024-10-20 21:36:50.000\t60.0\t[+I[1, Main Front Door, 0], +I[2, Deck Door, 0]]\t[+I[1, Room, Family Room, 71.0, 71.0, 0, 1, [+I[1, Left Window, 0], +I[2, Lake View Window, 0]]], +I[2, Room, Bed Room, 76.0, 72.0, 0, 1, [+I[3, Front Window, 0], +I[4, Neighbour Window, 0]]]]\n"
+          },
+          {
+            "type": "TEXT",
+            "data": "Fail to run sql command: SELECT *\nFROM sensor_data\n"
+          },
+          {
+            "type": "ANGULAR",
+            "data": "<div class='container ng-scope' style='padding-left:0px;padding-right:0px;'>\n    <div class='panel panel-danger'>\n        <div class='panel-heading' ng-click='isOpen=!isOpen' ng-init='isOpen=false' style=\"cursor:pointer\">\n            <div class='plainTextContainer' style='font-weight:bolder'><i class=\"fa fa-caret-right fa-fw\" style=\"padding-right:7px;transition:all 0.3s;{{isOpen?'transform:rotate(90deg);transform-origin:25% 45%':''}}\"></i>Job was cancelled.</div>\n        </div>\n        <div class='panel-collapse' uib-collapse='!isOpen'>\n            <div class='text' style='max-height:300px;overflow:auto;padding:10px'>java.lang.RuntimeException: Fail to run update type stream job\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:94)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.lambda$open$0(FlinkStreamSqlInterpreter.java:49)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callStreamInnerSelect(Flink115SqlInterpreter.java:451)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callSelect(Flink115SqlInterpreter.java:435)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callOperation(Flink115SqlInterpreter.java:290)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.runSqlList(Flink115SqlInterpreter.java:236)\n\tat org.apache.zeppelin.flink.Flink115Shims.runSqlList(Flink115Shims.java:315)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.runSqlList(FlinkStreamSqlInterpreter.java:103)\n\tat org.apache.zeppelin.flink.FlinkSqlInterpreter.internalInterpret(FlinkSqlInterpreter.java:63)\n\tat org.apache.zeppelin.interpreter.AbstractInterpreter.interpret(AbstractInterpreter.java:55)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.interpret(LazyOpenInterpreter.java:110)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:860)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.ParallelScheduler.lambda$runJobInScheduler$0(ParallelScheduler.java:46)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: java.io.IOException: Fail to run stream sql job\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:165)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:109)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:92)\n\t... 18 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.TableResultImpl.awaitInternal(TableResultImpl.java:118)\n\tat org.apache.flink.table.api.internal.TableResultImpl.await(TableResultImpl.java:81)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:154)\n\t... 20 more\nCaused by: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:85)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.isFirstRowReady(InsertResultProvider.java:71)\n\tat org.apache.flink.table.api.internal.TableResultImpl.lambda$awaitInternal$1(TableResultImpl.java:105)\n\tat java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)\n\t... 3 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 338b6f6c270b8fdc6b0eaadd6c9d0289)\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:83)\n\t... 6 more\nCaused by: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 338b6f6c270b8fdc6b0eaadd6c9d0289)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:130)\n\tat java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:642)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.client.program.rest.RestClusterClient.lambda$pollResourceAsync$26(RestClusterClient.java:708)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.postFire(CompletableFuture.java:610)\n\tat java.base/java.util.concurrent.CompletableFuture$UniCompose.tryFire(CompletableFuture.java:1085)\n\tat java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:478)\n\t... 3 more\nCaused by: org.apache.flink.runtime.client.JobCancellationException: Job was cancelled.\n\tat org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:146)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:128)\n\t... 23 more\n</div>\n        </div>\n    </div>\n</div>\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212090_575598118",
+      "id": "paragraph_1726583370953_961452312",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:196"
+    },
+    {
+      "title": "#3 : Create Temporary View for summarized sensor data by SubFacilities",
+      "text": "%flink.ssql(type=update)\n\nDROP TEMPORARY VIEW IF EXISTS room_sensor_data_vw;\n\n\nCREATE TEMPORARY VIEW room_sensor_data_vw AS\n\nSELECT FacilityId, FacilityType, FacilityName, OutdoorTemp, SubFacilityId, SubFacilityType, SubFacilityName, SubFacilityTemp, SubFacilityDesiredTemp, IsHeatingOn, IsCoolingOn, EventTime, Max(IsDoorOpen) IsAnyDoorOpen, Max(IsWindowOpen) IsAnyWindowOpen\nFROM sensor_data\nCROSS JOIN UNNEST(Doors) AS T(DoorId,DoorName,IsDoorOpen)\nCROSS JOIN UNNEST(SubFacilities) AS T1(SubFacilityId, SubFacilityType, SubFacilityName, SubFacilityTemp, SubFacilityDesiredTemp, IsHeatingOn, IsCoolingOn, Windows)\nCROSS JOIN UNNEST(Windows) AS T2(WindowId, WindowName, IsWindowOpen)\nWHERE FacilityType = 'Single-Family-Home'\nGROUP BY FacilityId, FacilityType, FacilityName, OutdoorTemp, SubFacilityId, SubFacilityType, SubFacilityName, SubFacilityTemp, SubFacilityDesiredTemp, IsHeatingOn, IsCoolingOn, EventTime;\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "View has been dropped.\nView has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212119_2108608287",
+      "id": "paragraph_1726583485524_193493139",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:197"
+    },
+    {
+      "title": "#4 : Observe room_sensor_data_vw output",
+      "text": "%flink.ssql(type=update)\nSELECT *\nFROM room_sensor_data_vw",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {
+                    "columns": [
+                      {
+                        "name": "FacilityId0",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "FacilityType1",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "FacilityName2",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "ReportedTime3",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "OutdoorTemp4",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "Doors5",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "SubFacilities6",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      }
+                    ],
+                    "scrollFocus": {},
+                    "selection": [],
+                    "grouping": {
+                      "grouping": [],
+                      "aggregations": [],
+                      "rowExpandedStates": {}
+                    },
+                    "treeView": {},
+                    "pagination": {
+                      "paginationCurrentPage": 1,
+                      "paginationPageSize": 250
+                    }
+                  },
+                  "tableColumnTypeState": {
+                    "updated": false,
+                    "names": {
+                      "FacilityId": "string",
+                      "FacilityType": "string",
+                      "FacilityName": "string",
+                      "OutdoorTemp": "string",
+                      "SubFacilityId": "string",
+                      "SubFacilityType": "string",
+                      "SubFacilityName": "string",
+                      "SubFacilityTemp": "string",
+                      "SubFacilityDesiredTemp": "string",
+                      "IsHeatingOn": "string",
+                      "IsCoolingOn": "string",
+                      "EventTime": "string",
+                      "IsAnyDoorOpen": "string",
+                      "IsAnyWindowOpen": "string"
+                    }
+                  },
+                  "updated": false,
+                  "initialized": false,
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  }
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "FacilityId",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "FacilityType",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "FacilityId\tFacilityType\tFacilityName\tOutdoorTemp\tSubFacilityId\tSubFacilityType\tSubFacilityName\tSubFacilityTemp\tSubFacilityDesiredTemp\tIsHeatingOn\tIsCoolingOn\tEventTime\tIsAnyDoorOpen\tIsAnyWindowOpen\n1\tSingle-Family-Home\tSmith Home\t60.0\t1\tRoom\tFamily Room\t71.0\t71.0\t0\t1\t2024-10-20 21:41:26.000\t0\t0\n1\tSingle-Family-Home\tSmith Home\t60.0\t2\tRoom\tBed Room\t76.0\t72.0\t0\t1\t2024-10-20 21:41:26.000\t0\t0\n"
+          },
+          {
+            "type": "TEXT",
+            "data": "Fail to run sql command: SELECT *\nFROM room_sensor_data_vw\n"
+          },
+          {
+            "type": "ANGULAR",
+            "data": "<div class='container ng-scope' style='padding-left:0px;padding-right:0px;'>\n    <div class='panel panel-danger'>\n        <div class='panel-heading' ng-click='isOpen=!isOpen' ng-init='isOpen=false' style=\"cursor:pointer\">\n            <div class='plainTextContainer' style='font-weight:bolder'><i class=\"fa fa-caret-right fa-fw\" style=\"padding-right:7px;transition:all 0.3s;{{isOpen?'transform:rotate(90deg);transform-origin:25% 45%':''}}\"></i>Job was cancelled.</div>\n        </div>\n        <div class='panel-collapse' uib-collapse='!isOpen'>\n            <div class='text' style='max-height:300px;overflow:auto;padding:10px'>java.lang.RuntimeException: Fail to run update type stream job\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:94)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.lambda$open$0(FlinkStreamSqlInterpreter.java:49)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callStreamInnerSelect(Flink115SqlInterpreter.java:451)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callSelect(Flink115SqlInterpreter.java:435)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callOperation(Flink115SqlInterpreter.java:290)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.runSqlList(Flink115SqlInterpreter.java:236)\n\tat org.apache.zeppelin.flink.Flink115Shims.runSqlList(Flink115Shims.java:315)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.runSqlList(FlinkStreamSqlInterpreter.java:103)\n\tat org.apache.zeppelin.flink.FlinkSqlInterpreter.internalInterpret(FlinkSqlInterpreter.java:63)\n\tat org.apache.zeppelin.interpreter.AbstractInterpreter.interpret(AbstractInterpreter.java:55)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.interpret(LazyOpenInterpreter.java:110)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:860)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.ParallelScheduler.lambda$runJobInScheduler$0(ParallelScheduler.java:46)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: java.io.IOException: Fail to run stream sql job\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:165)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:109)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:92)\n\t... 18 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.TableResultImpl.awaitInternal(TableResultImpl.java:118)\n\tat org.apache.flink.table.api.internal.TableResultImpl.await(TableResultImpl.java:81)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:154)\n\t... 20 more\nCaused by: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:85)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.isFirstRowReady(InsertResultProvider.java:71)\n\tat org.apache.flink.table.api.internal.TableResultImpl.lambda$awaitInternal$1(TableResultImpl.java:105)\n\tat java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)\n\t... 3 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 153c1b78b7350f6865ff2b2af6b40afd)\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:83)\n\t... 6 more\nCaused by: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 153c1b78b7350f6865ff2b2af6b40afd)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:130)\n\tat java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:642)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.client.program.rest.RestClusterClient.lambda$pollResourceAsync$26(RestClusterClient.java:708)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.postFire(CompletableFuture.java:610)\n\tat java.base/java.util.concurrent.CompletableFuture$UniCompose.tryFire(CompletableFuture.java:1085)\n\tat java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:478)\n\t... 3 more\nCaused by: org.apache.flink.runtime.client.JobCancellationException: Job was cancelled.\n\tat org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:146)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:128)\n\t... 23 more\n</div>\n        </div>\n    </div>\n</div>\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212119_725175156",
+      "id": "paragraph_1726609682674_286045005",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:198"
+    },
+    {
+      "title": "#5 : Create aggregated sensor data table which is mapped to firehose stream",
+      "text": "%flink.ssql(type=update)\n\nDROP TABLE IF EXISTS room_aggregated_sensor_data;\n\nCREATE TABLE room_aggregated_sensor_data (\nWindowStart TIMESTAMP_LTZ,\nWindowEnd TIMESTAMP_LTZ,\nFacilityId BIGINT,\nFacilityName VARCHAR,\nSubFacilityId BIGINT,\nSubFacilityName VARCHAR,\nCountOfMessages BIGINT,\nMinOutdoorTemp DOUBLE,\nMaxOutdoorTemp DOUBLE,\nAvgOutdoorTemp DOUBLE,\nMinSubFacilityTemp DOUBLE,\nMaxSubFacilityTemp DOUBLE,\nAvgSubFacilityTemp DOUBLE,\nMinSubFacilityDesiredTemp DOUBLE,\nMaxSubFacilityDesiredTemp DOUBLE,\nAvgSubFacilityDesiredTemp DOUBLE,\nMinIsHeatingOn DOUBLE,\nMaxIsHeatingOn DOUBLE,\nAvgIsHeatingOn DOUBLE,\nMinIsCoolingOn DOUBLE,\nMaxIsCoolingOn DOUBLE,\nAvgIsCoolingOn DOUBLE,\nMinIsAnyDoorOpen DOUBLE,\nMaxIsAnyDoorOpen DOUBLE,\nAvgIsAnyDoorOpen DOUBLE,\nMinIsAnyWindowOpen DOUBLE,\nMaxIsAnyWindowOpen DOUBLE,\nAvgIsAnyWindowOpen DOUBLE\n)\nWITH (\n  'connector' = 'firehose',\n  'delivery-stream' = 'room-aggregated-sensor-data-delivery-stream',\n  'aws.region' = 'us-east-1',\n  'format' = 'csv'\n);\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Table has been dropped.\nTable has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212120_951842582",
+      "id": "paragraph_1726717177970_567744907",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:199"
+    },
+    {
+      "title": "#6 : Insert aggregated sensor data to firehose delivery stream stream",
+      "text": "%flink.ssql(type=update)\n\n-- https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/operators/windows/\n\nINSERT INTO room_aggregated_sensor_data\nSELECT\n    TUMBLE_START(EventTime, INTERVAL '1' MINUTE) AS window_start,\n    TUMBLE_END(EventTime, INTERVAL '1' MINUTE) AS window_end,\n    FacilityId,\n    FacilityName,\n    SubFacilityId,\n    SubFacilityName,\n    Count(*),\n    Min(OutdoorTemp),\n    Max(OutdoorTemp),\n    Avg(OutdoorTemp),\n    Min(SubFacilityTemp),\n    Max(SubFacilityTemp),\n    Avg(SubFacilityTemp),\n    Min(SubFacilityDesiredTemp),\n    Max(SubFacilityDesiredTemp),\n    Avg(SubFacilityDesiredTemp),\n    Min(IsHeatingOn),\n    Max(IsHeatingOn),\n    Avg(IsHeatingOn),\n    Min(IsCoolingOn),\n    Max(IsCoolingOn),\n    Avg(IsCoolingOn),\n    Min(IsAnyDoorOpen),\n    Max(IsAnyDoorOpen),\n    Avg(IsAnyDoorOpen),\n    Min(IsAnyWindowOpen),\n    Max(IsAnyWindowOpen),\n    Avg(IsAnyWindowOpen)\nFROM\n    room_sensor_data_vw\nGROUP BY\n    TUMBLE(EventTime, INTERVAL '1' MINUTE), FacilityId, FacilityName, SubFacilityId, SubFacilityName;\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "window_start": "string",
+                      "window_end": "string",
+                      "FacilityId": "string",
+                      "FacilityName": "string",
+                      "SubFacilityId": "string",
+                      "SubFacilityName": "string",
+                      "EXPR$6": "string",
+                      "EXPR$7": "string",
+                      "EXPR$8": "string",
+                      "EXPR$9": "string",
+                      "EXPR$10": "string",
+                      "EXPR$11": "string",
+                      "EXPR$12": "string",
+                      "EXPR$13": "string",
+                      "EXPR$14": "string",
+                      "EXPR$15": "string",
+                      "EXPR$16": "string",
+                      "EXPR$17": "string",
+                      "EXPR$18": "string",
+                      "EXPR$19": "string",
+                      "EXPR$20": "string",
+                      "EXPR$21": "string",
+                      "EXPR$22": "string",
+                      "EXPR$23": "string",
+                      "EXPR$24": "string",
+                      "EXPR$25": "string",
+                      "EXPR$26": "string",
+                      "EXPR$27": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212120_492302830",
+      "id": "paragraph_1726718660921_1547954892",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:200"
+    },
+    {
+      "title": "#7 : Create Temporary View for sliding window output",
+      "text": "%flink.ssql(type=update)\n\nDROP TEMPORARY VIEW IF EXISTS room_cooling_sensor_data_vw;\n\n\nCREATE TEMPORARY VIEW room_cooling_sensor_data_vw AS\n\nSELECT *, window_end as eval_time, CAST(window_end AS DATE) date_part, EXTRACT(HOUR FROM window_end) hour_part, (FLOOR(EXTRACT(MINUTE FROM window_end) / 10) * 10) AS ten_minute_bucket\nFROM (\nSELECT\n    HOP_START(EventTime, INTERVAL '1' MINUTE, INTERVAL '10' MINUTE) AS window_start,\n    CAST(HOP_END(EventTime, INTERVAL '1' MINUTE, INTERVAL '10' MINUTE) AS TIMESTAMP_LTZ(3)) AS window_end,\n    FacilityId,\n    FacilityName,\n    SubFacilityId,\n    SubFacilityName,\n    Count(*) CountOfMessages,\n    Min(SubFacilityTemp) MinSubFacilityTemp,\n    Max(SubFacilityTemp) MaxSubFacilityTem,\n    Min(SubFacilityDesiredTemp) MinSubFacilityDesiredTemp,\n    Max(SubFacilityDesiredTemp) MaxSubFacilityDesiredTemp,\n    Min(IsCoolingOn) MinIsCoolingOn,\n    Max(IsAnyDoorOpen) MaxIsAnyDoorOpen,\n    Max(IsAnyWindowOpen) MaxIsAnyWindowOpen\nFROM room_sensor_data_vw\nGROUP BY  FacilityId, FacilityName, SubFacilityId, SubFacilityName, HOP(EventTime, INTERVAL '1' MINUTE, INTERVAL '10' MINUTE)\n);\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "View has been dropped.\nView has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212135_2060584511",
+      "id": "paragraph_1726776180028_1664413828",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:201"
+    },
+    {
+      "title": "#8 : Observe room_cooling_sensor_data_vw output",
+      "text": "%flink.ssql(type=update)\n\nselect * from room_cooling_sensor_data_vw;\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "window_start": "string",
+                      "window_end": "string",
+                      "FacilityId": "string",
+                      "FacilityName": "string",
+                      "SubFacilityId": "string",
+                      "SubFacilityName": "string",
+                      "CountOfMessages": "string",
+                      "MinSubFacilityTemp": "string",
+                      "MaxSubFacilityTem": "string",
+                      "MinSubFacilityDesiredTemp": "string",
+                      "MaxSubFacilityDesiredTemp": "string",
+                      "MinIsCoolingOn": "string",
+                      "MaxIsAnyDoorOpen": "string",
+                      "MaxIsAnyWindowOpen": "string",
+                      "eval_time": "string",
+                      "date_part": "string",
+                      "hour_part": "string",
+                      "ten_minute_bucket": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "window_start\twindow_end\tFacilityId\tFacilityName\tSubFacilityId\tSubFacilityName\tCountOfMessages\tMinSubFacilityTemp\tMaxSubFacilityTem\tMinSubFacilityDesiredTemp\tMaxSubFacilityDesiredTemp\tMinIsCoolingOn\tMaxIsAnyDoorOpen\tMaxIsAnyWindowOpen\teval_time\tdate_part\thour_part\tten_minute_bucket\n2024-10-21 08:22:00.000\t2024-10-21 08:32:00.000\t1\tSmith Home\t1\tFamily Room\t2\t71.0\t71.0\t71.0\t71.0\t1\t0\t0\t2024-10-21 08:32:00.000\t2024-10-21\t8\t30\n2024-10-21 08:22:00.000\t2024-10-21 08:32:00.000\t1\tSmith Home\t2\tBed Room\t2\t76.0\t76.0\t72.0\t72.0\t1\t0\t0\t2024-10-21 08:32:00.000\t2024-10-21\t8\t30\n2024-10-21 08:23:00.000\t2024-10-21 08:33:00.000\t1\tSmith Home\t2\tBed Room\t8\t76.0\t76.0\t72.0\t72.0\t1\t0\t0\t2024-10-21 08:33:00.000\t2024-10-21\t8\t30\n2024-10-21 08:23:00.000\t2024-10-21 08:33:00.000\t1\tSmith Home\t1\tFamily Room\t8\t71.0\t71.0\t71.0\t71.0\t1\t0\t0\t2024-10-21 08:33:00.000\t2024-10-21\t8\t30\n"
+          },
+          {
+            "type": "TEXT",
+            "data": "Fail to run sql command: select * from room_cooling_sensor_data_vw\n"
+          },
+          {
+            "type": "ANGULAR",
+            "data": "<div class='container ng-scope' style='padding-left:0px;padding-right:0px;'>\n    <div class='panel panel-danger'>\n        <div class='panel-heading' ng-click='isOpen=!isOpen' ng-init='isOpen=false' style=\"cursor:pointer\">\n            <div class='plainTextContainer' style='font-weight:bolder'><i class=\"fa fa-caret-right fa-fw\" style=\"padding-right:7px;transition:all 0.3s;{{isOpen?'transform:rotate(90deg);transform-origin:25% 45%':''}}\"></i>Job was cancelled.</div>\n        </div>\n        <div class='panel-collapse' uib-collapse='!isOpen'>\n            <div class='text' style='max-height:300px;overflow:auto;padding:10px'>java.lang.RuntimeException: Fail to run update type stream job\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:94)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.lambda$open$0(FlinkStreamSqlInterpreter.java:49)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callStreamInnerSelect(Flink115SqlInterpreter.java:451)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callSelect(Flink115SqlInterpreter.java:435)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callOperation(Flink115SqlInterpreter.java:290)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.runSqlList(Flink115SqlInterpreter.java:236)\n\tat org.apache.zeppelin.flink.Flink115Shims.runSqlList(Flink115Shims.java:315)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.runSqlList(FlinkStreamSqlInterpreter.java:103)\n\tat org.apache.zeppelin.flink.FlinkSqlInterpreter.internalInterpret(FlinkSqlInterpreter.java:63)\n\tat org.apache.zeppelin.interpreter.AbstractInterpreter.interpret(AbstractInterpreter.java:55)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.interpret(LazyOpenInterpreter.java:110)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:860)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.ParallelScheduler.lambda$runJobInScheduler$0(ParallelScheduler.java:46)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: java.io.IOException: Fail to run stream sql job\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:165)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:109)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.callInnerSelect(FlinkStreamSqlInterpreter.java:92)\n\t... 18 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.TableResultImpl.awaitInternal(TableResultImpl.java:118)\n\tat org.apache.flink.table.api.internal.TableResultImpl.await(TableResultImpl.java:81)\n\tat org.apache.zeppelin.flink.sql.AbstractStreamSqlJob.run(AbstractStreamSqlJob.java:154)\n\t... 20 more\nCaused by: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:85)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.isFirstRowReady(InsertResultProvider.java:71)\n\tat org.apache.flink.table.api.internal.TableResultImpl.lambda$awaitInternal$1(TableResultImpl.java:105)\n\tat java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)\n\t... 3 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: a85d215afc5667ba97e05256102c7961)\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:83)\n\t... 6 more\nCaused by: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: a85d215afc5667ba97e05256102c7961)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:130)\n\tat java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:642)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.client.program.rest.RestClusterClient.lambda$pollResourceAsync$26(RestClusterClient.java:708)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.postFire(CompletableFuture.java:610)\n\tat java.base/java.util.concurrent.CompletableFuture$UniCompose.tryFire(CompletableFuture.java:1085)\n\tat java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:478)\n\t... 3 more\nCaused by: org.apache.flink.runtime.client.JobCancellationException: Job was cancelled.\n\tat org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:146)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:128)\n\t... 23 more\n</div>\n        </div>\n    </div>\n</div>\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212135_1245666257",
+      "id": "paragraph_1729517389511_689043218",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:202"
+    },
+    {
+      "title": "#9 : Create a view to eliminate duplicate cooling alerts",
+      "text": "%flink.ssql(type=update)\n\nDROP VIEW IF EXISTS cooling_alert_data_vw;\n\n\nCREATE VIEW cooling_alert_data_vw AS\n\nSELECT \n  FacilityId,\n  FacilityName,\n  SubFacilityId,\n  SubFacilityName, \n  CAST(window_end AS TIMESTAMP) evaluation_time,\n  CountOfMessages,\n  MinSubFacilityTemp,\n  MaxSubFacilityTem,\n  MinSubFacilityDesiredTemp,\n  MaxSubFacilityDesiredTemp,\n  MinIsCoolingOn,\n  MaxIsAnyDoorOpen,\n  MaxIsAnyWindowOpen\n  \nFROM (\n    SELECT *,\n      ROW_NUMBER() OVER (\n        PARTITION BY FacilityId, FacilityName, SubFacilityId, SubFacilityName, date_part, hour_part, ten_minute_bucket\n        ORDER BY eval_time ASC\n      ) as rownum\n    FROM room_cooling_sensor_data_vw\n    where CountOfMessages >= 8 -- Make sure enough messages arrived\n    AND MinIsCoolingOn = 1 -- Make sure all massages in evaluated window has cooling on\n    AND MinSubFacilityDesiredTemp = MaxSubFacilityDesiredTemp -- Make sure DesiredTemp do not change for evaluated window\n    AND MinSubFacilityTemp > MinSubFacilityDesiredTemp -- Make sure SubFacilityTemp is hotter than DesiredTemp, cooling of room is requested/required\n    AND (MaxSubFacilityTem - MinSubFacilityTemp) < 1 -- For 10 minutes of continues cooling, temp delta is not >= 1\n    AND MaxIsAnyDoorOpen = 0 -- Make sure all Doors of house are closed\n    AND MaxIsAnyWindowOpen = 0 -- Make sure all Windows of the room are closed\n)\nWHERE rownum = 1;\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "FacilityId": "string",
+                      "FacilityName": "string",
+                      "SubFacilityId": "string",
+                      "SubFacilityName": "string",
+                      "evaluation_time": "string",
+                      "CountOfMessages": "string",
+                      "MinSubFacilityTemp": "string",
+                      "MaxSubFacilityTem": "string",
+                      "MinSubFacilityDesiredTemp": "string",
+                      "MaxSubFacilityDesiredTemp": "string",
+                      "MinIsCoolingOn": "string",
+                      "MaxIsAnyDoorOpen": "string",
+                      "MaxIsAnyWindowOpen": "string",
+                      "rownum": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "View has been dropped.\nView has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212152_402821069",
+      "id": "paragraph_1727460900531_952842132",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:203"
+    },
+    {
+      "title": "#10 : Create cooling alert data table which is mapped to kinesis stream",
+      "text": "%flink.ssql(type=update)\n\nDROP TABLE IF EXISTS cooling_alert_data;\n\nCREATE TABLE cooling_alert_data (\nFacilityId BIGINT,\nFacilityName VARCHAR,\nSubFacilityId BIGINT,\nSubFacilityName VARCHAR,\nEvaluationTime TIMESTAMP(3),\nCountOfMessages BIGINT,\nMinSubFacilityTemp DOUBLE,\nMaxSubFacilityTemp DOUBLE,\nMinSubFacilityDesiredTemp DOUBLE,\nMaxSubFacilityDesiredTemp DOUBLE,\nMinIsCoolingOn DOUBLE,\nMaxIsAnyDoorOpen DOUBLE,\nAvgIsAnyWindowOpen DOUBLE\n)\nWITH (\n  'connector' = 'kinesis',\n  'stream' = 'cooling-alert-stream',\n  'aws.region' = 'us-east-1',\n  'format' = 'csv'\n);\n",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Table has been dropped.\nTable has been created.\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212230_1247767423",
+      "id": "paragraph_1727459593397_1325685092",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:204"
+    },
+    {
+      "title": "#11 : Insert cooling alert data into kinesis data stream",
+      "text": "%flink.ssql(type=update)\n\nINSERT INTO cooling_alert_data\nSelect\n  FacilityId,\n  FacilityName,\n  SubFacilityId,\n  SubFacilityName, \n  evaluation_time,\n  CountOfMessages,\n  MinSubFacilityTemp,\n  MaxSubFacilityTem,\n  MinSubFacilityDesiredTemp,\n  MaxSubFacilityDesiredTemp,\n  MinIsCoolingOn,\n  MaxIsAnyDoorOpen,\n  MaxIsAnyWindowOpen\nfrom cooling_alert_data_vw\nGROUP BY\n    TUMBLE(PROCTIME(), INTERVAL '10' SECOND), FacilityId, FacilityName, SubFacilityId, SubFacilityName,  evaluation_time, CountOfMessages, MinSubFacilityTemp, MaxSubFacilityTem, MinSubFacilityDesiredTemp, MaxSubFacilityDesiredTemp, MinIsCoolingOn, MaxIsAnyDoorOpen, MaxIsAnyWindowOpen;",
+      "user": "anonymous",
+      "dateUpdated": "2024-11-26T15:16:52+0000",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "FacilityId": "string",
+                      "FacilityName": "string",
+                      "SubFacilityId": "string",
+                      "SubFacilityName": "string",
+                      "evaluation_time": "string",
+                      "CountOfMessages": "string",
+                      "MinSubFacilityTemp": "string",
+                      "MaxSubFacilityTem": "string",
+                      "MinSubFacilityDesiredTemp": "string",
+                      "MaxSubFacilityDesiredTemp": "string",
+                      "MinIsCoolingOn": "string",
+                      "MaxIsAnyDoorOpen": "string",
+                      "MaxIsAnyWindowOpen": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "<h1>Duration: {{duration}} </h1>\n"
+          },
+          {
+            "type": "TEXT",
+            "data": "Fail to run sql command: INSERT INTO cooling_alert_data\nSelect\n  FacilityId,\n  FacilityName,\n  SubFacilityId,\n  SubFacilityName, \n  evaluation_time,\n  CountOfMessages,\n  MinSubFacilityTemp,\n  MaxSubFacilityTem,\n  MinSubFacilityDesiredTemp,\n  MaxSubFacilityDesiredTemp,\n  MinIsCoolingOn,\n  MaxIsAnyDoorOpen,\n  MaxIsAnyWindowOpen\nfrom cooling_alert_data_vw\nGROUP BY\n    TUMBLE(PROCTIME(), INTERVAL '10' SECOND), FacilityId, FacilityName, SubFacilityId, SubFacilityName,  evaluation_time, CountOfMessages, MinSubFacilityTemp, MaxSubFacilityTem, MinSubFacilityDesiredTemp, MaxSubFacilityDesiredTemp, MinIsCoolingOn, MaxIsAnyDoorOpen, MaxIsAnyWindowOpen\n"
+          },
+          {
+            "type": "ANGULAR",
+            "data": "<div class='container ng-scope' style='padding-left:0px;padding-right:0px;'>\n    <div class='panel panel-danger'>\n        <div class='panel-heading' ng-click='isOpen=!isOpen' ng-init='isOpen=false' style=\"cursor:pointer\">\n            <div class='plainTextContainer' style='font-weight:bolder'><i class=\"fa fa-caret-right fa-fw\" style=\"padding-right:7px;transition:all 0.3s;{{isOpen?'transform:rotate(90deg);transform-origin:25% 45%':''}}\"></i>RuntimeException: Retries exceeded for getRecords operation - all 3 retry attempts failed.</div>\n        </div>\n        <div class='panel-collapse' uib-collapse='!isOpen'>\n            <div class='text' style='max-height:300px;overflow:auto;padding:10px'>java.io.IOException: Flink job is failed\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callInserts(Flink115SqlInterpreter.java:397)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callInsert(Flink115SqlInterpreter.java:371)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callOperation(Flink115SqlInterpreter.java:287)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.runSqlList(Flink115SqlInterpreter.java:236)\n\tat org.apache.zeppelin.flink.Flink115Shims.runSqlList(Flink115Shims.java:315)\n\tat org.apache.zeppelin.flink.FlinkStreamSqlInterpreter.runSqlList(FlinkStreamSqlInterpreter.java:103)\n\tat org.apache.zeppelin.flink.FlinkSqlInterpreter.internalInterpret(FlinkSqlInterpreter.java:63)\n\tat org.apache.zeppelin.interpreter.AbstractInterpreter.interpret(AbstractInterpreter.java:55)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.interpret(LazyOpenInterpreter.java:110)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:860)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:752)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:172)\n\tat org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:132)\n\tat org.apache.zeppelin.scheduler.ParallelScheduler.lambda$runJobInScheduler$0(ParallelScheduler.java:46)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.TableResultImpl.awaitInternal(TableResultImpl.java:118)\n\tat org.apache.flink.table.api.internal.TableResultImpl.await(TableResultImpl.java:81)\n\tat org.apache.zeppelin.flink.Flink115SqlInterpreter.callInserts(Flink115SqlInterpreter.java:385)\n\t... 16 more\nCaused by: org.apache.flink.table.api.TableException: Failed to wait job finish\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:85)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.isFirstRowReady(InsertResultProvider.java:71)\n\tat org.apache.flink.table.api.internal.TableResultImpl.lambda$awaitInternal$1(TableResultImpl.java:105)\n\tat java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1736)\n\t... 3 more\nCaused by: java.util.concurrent.ExecutionException: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 5f54ad77269fd247b1487ec70617f490)\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2005)\n\tat org.apache.flink.table.api.internal.InsertResultProvider.hasNext(InsertResultProvider.java:83)\n\t... 6 more\nCaused by: org.apache.flink.client.program.ProgramInvocationException: Job failed (JobID: 5f54ad77269fd247b1487ec70617f490)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:130)\n\tat java.base/java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:642)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.client.program.rest.RestClusterClient.lambda$pollResourceAsync$26(RestClusterClient.java:708)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:2079)\n\tat org.apache.flink.util.concurrent.FutureUtils.lambda$retryOperationWithDelay$9(FutureUtils.java:403)\n\tat java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:859)\n\tat java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:837)\n\tat java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:506)\n\tat java.base/java.util.concurrent.CompletableFuture.postFire(CompletableFuture.java:610)\n\tat java.base/java.util.concurrent.CompletableFuture$UniCompose.tryFire(CompletableFuture.java:1085)\n\tat java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:478)\n\t... 3 more\nCaused by: org.apache.flink.runtime.client.JobExecutionException: Job execution failed.\n\tat org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:144)\n\tat org.apache.flink.client.deployment.ClusterClientJobClientAdapter.lambda$getJobExecutionResult$6(ClusterClientJobClientAdapter.java:128)\n\t... 23 more\nCaused by: org.apache.flink.runtime.JobException: Recovery is suppressed by NoRestartBackoffTimeStrategy\n\tat org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.handleFailure(ExecutionFailureHandler.java:138)\n\tat org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.getFailureHandlingResult(ExecutionFailureHandler.java:82)\n\tat org.apache.flink.runtime.scheduler.DefaultScheduler.handleTaskFailure(DefaultScheduler.java:309)\n\tat org.apache.flink.runtime.scheduler.DefaultScheduler.maybeHandleTaskFailure(DefaultScheduler.java:299)\n\tat org.apache.flink.runtime.scheduler.DefaultScheduler.updateTaskExecutionStateInternal(DefaultScheduler.java:290)\n\tat org.apache.flink.runtime.scheduler.SchedulerBase.updateTaskExecutionState(SchedulerBase.java:792)\n\tat org.apache.flink.runtime.scheduler.SchedulerNG.updateTaskExecutionState(SchedulerNG.java:79)\n\tat org.apache.flink.runtime.jobmaster.JobMaster.updateTaskExecutionState(JobMaster.java:452)\n\tat jdk.internal.reflect.GeneratedMethodAccessor126.invoke(Unknown Source)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:566)\n\tat org.apache.flink.runtime.rpc.akka.AkkaRpcActor.lambda$handleRpcInvocation$1(AkkaRpcActor.java:304)\n\tat org.apache.flink.runtime.concurrent.akka.ClassLoadingUtils.runWithContextClassLoader(ClassLoadingUtils.java:83)\n\tat org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcInvocation(AkkaRpcActor.java:302)\n\tat org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcMessage(AkkaRpcActor.java:217)\n\tat org.apache.flink.runtime.rpc.akka.FencedAkkaRpcActor.handleRpcMessage(FencedAkkaRpcActor.java:78)\n\tat org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleMessage(AkkaRpcActor.java:163)\n\tat akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:24)\n\tat akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:20)\n\tat scala.PartialFunction.applyOrElse(PartialFunction.scala:123)\n\tat scala.PartialFunction.applyOrElse$(PartialFunction.scala:122)\n\tat akka.japi.pf.UnitCaseStatement.applyOrElse(CaseStatements.scala:20)\n\tat scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:171)\n\tat scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)\n\tat scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)\n\tat akka.actor.Actor.aroundReceive(Actor.scala:537)\n\tat akka.actor.Actor.aroundReceive$(Actor.scala:535)\n\tat akka.actor.AbstractActor.aroundReceive(AbstractActor.scala:220)\n\tat akka.actor.ActorCell.receiveMessage(ActorCell.scala:580)\n\tat akka.actor.ActorCell.invoke(ActorCell.scala:548)\n\tat akka.dispatch.Mailbox.processMailbox(Mailbox.scala:270)\n\tat akka.dispatch.Mailbox.run(Mailbox.scala:231)\n\tat akka.dispatch.Mailbox.exec(Mailbox.scala:243)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:290)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1020)\n\tat java.base/java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1656)\n\tat java.base/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1594)\n\tat java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:183)\nCaused by: java.lang.RuntimeException: Retries exceeded for getRecords operation - all 3 retry attempts failed.\n\tat org.apache.flink.streaming.connectors.kinesis.proxy.KinesisProxy.getRecords(KinesisProxy.java:320)\n\tat org.apache.flink.streaming.connectors.kinesis.internals.publisher.polling.PollingRecordPublisher.getRecords(PollingRecordPublisher.java:168)\n\tat org.apache.flink.streaming.connectors.kinesis.internals.publisher.polling.PollingRecordPublisher.run(PollingRecordPublisher.java:113)\n\tat org.apache.flink.streaming.connectors.kinesis.internals.publisher.polling.PollingRecordPublisher.run(PollingRecordPublisher.java:102)\n\tat org.apache.flink.streaming.connectors.kinesis.internals.ShardConsumer.run(ShardConsumer.java:114)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)\n\tat java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\n</div>\n        </div>\n    </div>\n</div>\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1732634212230_944713500",
+      "id": "paragraph_1726800992714_116374155",
+      "dateCreated": "2024-11-26T15:16:52+0000",
+      "status": "READY",
+      "$$hashKey": "object:205"
+    }
+  ],
+  "name": "single-family-home-data-processing-application",
+  "id": "2KDQTNA1S",
+  "defaultInterpreterGroup": "flink",
+  "version": "0.10.1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {},
+  "path": "/single-family-home-data-processing-application"
+}
