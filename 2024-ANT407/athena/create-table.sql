@@ -39,4 +39,4 @@ STORED AS INPUTFORMAT
 OUTPUTFORMAT 
   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
 LOCATION
-  's3://room-aggregated-sensor-data-bucket/sensor_input_data/'
+  's3://your-bucket-name/sensor_input_data/'
